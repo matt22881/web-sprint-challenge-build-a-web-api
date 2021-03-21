@@ -28,29 +28,49 @@ router.get('/:id', (req, res) => {
 })
 
 router.post('/', (req, res) => {
-    actions.insert(req.body)
-        .then(action => {
-            res.status(200).json(action)
-        })
-        .catch(err => {
-            res.status(500).json({message: `There was an error POSTing the action: \n ${res.body}`, error: err})
-        })
+    if (!req.body){
+        res.status(400).json({message: `Error: no request body`})
+    } else {
+        if (!req.body.notes || !req.body.description || !req.body.project_id){
+            res.status(400).json({message: 'Request body missing required field(s)'})
+        } else {
+            actions.insert(req.body)
+                .then(action => {
+                    res.status(200).json(action)
+                })
+                .catch(err => {
+                    res.status(500).json({message: `There was an error POSTing the action: ${res.body}`, error: err})
+                })
+        }
+    }  
 })
 
 router.put('/:id', (req, res) => {
-    actions.update(req.params.id, req.body)
-        .then(action => {
-            action && res.status(200).json(action)
-        })
-        .catch(err => {
-            res.status(500).json({message: `There was an error PUTing the object with ID# ${res.params.id}`, error: err})
-        })
-})
+    if (!req.body){
+        res.status(400).json({message: `Error: no request body`})
+    } else {
+        if (!req.body.changes){
+            res.status(400).json({message: 'Request body missing required field(s)'})
+        } else {
+            actions.update(req.params.id, req.body.changes)
+                .then(action => {
+                    res.status(200).json(action)
+                })
+                .catch(err => {
+                    res.status(500).json({message: `There was an error PUTing the action: ${res.body}`, error: err})
+                })
+        }
+    }
+})  
+
+            
+            
+        
 
 router.delete('/:id', (req, res) => {
     actions.remove(req.params.id)
         .then(() => {
-            res.status(200).json({message: `The following action with ID# ${req.params.id} has been deleted`, })
+            res.status(200).json({message: `The following action with ID# ${req.params.id} has been deleted`})
         })
         .catch(err => {
             res.status(500).json({message: `There was an error deleting action ID# ${req.params.id}`, error: err})
