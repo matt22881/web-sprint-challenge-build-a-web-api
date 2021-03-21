@@ -69,8 +69,12 @@ router.put('/:id', (req, res) => {
 
 router.delete('/:id', (req, res) => {
     actions.remove(req.params.id)
-        .then(() => {
-            res.status(200).json({message: `The following action with ID# ${req.params.id} has been deleted`})
+        .then(del => {
+            if (del === 0){
+                res.status(404).json({message: `Error: Action ID# ${req.params.id} does not exist in the database`})
+            } else {
+                res.status(200).json({message: `The action with ID# ${req.params.id} has been deleted`, deleted: del})
+            }
         })
         .catch(err => {
             res.status(500).json({message: `There was an error deleting action ID# ${req.params.id}`, error: err})
