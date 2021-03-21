@@ -17,13 +17,13 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
     actions.get(req.params.id)
-    .then(action => {
-        if (!action){
-            res.status(404).json({message: `Error, action ID# ${req.params.id} does not exist in the database.`})
-        } else res.status(200).json(action)
+        .then(action => {
+            if (!action){
+                res.status(404).json({message: `Error, action ID# ${req.params.id} does not exist in the database.`})
+            } else res.status(200).json(action)
         })
         .catch(err => {
-            res.status(500).json({message: `There was an error GETing the action with ID# ${id}`, error: err})
+            res.status(500).json({message: `There was an error GETing the action with ID# ${req.params.id}`, error: err})
         })
 })
 

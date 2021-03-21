@@ -17,16 +17,16 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
     projects.get(req.params.id)
-    .then(project => {
-        if (!project){
-            res.status(404).json({message: `Error, project ID# ${req.params.id} does not exist in the database.`})
-        } else {
-            res.status(200).json(project)
-        }
-    })
-    .catch(err => {
-        res.status(500).json({message: `There was an error GETing the project with ID# ${id}`, error: err})
-    })
+        .then(project => {
+            if (!project){
+                res.status(404).json({message: `Error, project ID# ${req.params.id} does not exist in the database.`})
+            } else {
+                res.status(200).json(project)
+            }
+        })
+        .catch(err => {
+            res.status(500).json({message: `There was an error GETing the project with ID# ${req.params.id}`, error: err})
+        })
 })
 
 router.get('/:id/actions', (req, res) => {
@@ -46,40 +46,47 @@ router.post('/', (req, res) => {
         if (!req.body.name || !req.body.description){
             res.status(400).json({message: 'Request body missing required field(s)'})
         } else {
-        projects.insert(req.body)
-        .then(project => {
-            res.status(200).json(project)
-        })
-        .catch(err => {
-            res.status(500).json({message: `There was an error POSTing the project: \n ${res.body}`, error: err})
-        })
+            projects.insert(req.body)
+                .then(project => {
+                    res.status(200).json(project)
+                })
+                .catch(err => {
+                    res.status(500).json({message: `There was an error POSTing the project: \n ${res.body}`, error: err})
+                })
+        }
     }
-}
 })
 
 router.put('/:id', (req, res) => {
-    if (!req.body){
-        res.status(400).json({message: `Error: no request body`})
-    } else {
-        projects.update(req.params.id, req.body.changes)
-            .then(project => {
-                project && res.status(200).json(project)
-            })
-            .catch(err => {
-                res.status(500).json({message: `There was an error PUTing the object with ID# ${res.params.id}`, error: err})
-            })
-    }
+    !req.body ? res.status(400).json({message: `Error: no request body`}) : !req.body.changes ? res.status(400).json({message: 'Request body missing required field(s)'}) : projects.get()
+        .then(projs => {
+            const thisProj = projs.filter(proj => proj.id = req.params.id)
+            if (!thisProj.length === 1){
+                res.status(404).json({message: `Error: Project ID# ${req.params.id} does not exist in the database`})
+            } else {
+                projects.update(req.params.id, req.body.changes)
+                    .then(project => {
+                        project && res.status(200).json(project)
+                    })
+                    .catch(err => {
+                        res.status(500).json({message: `Error PUTing project ID# ${req.params.id}`, error: err})
+                    })
+            }
+        })
+        .catch(err => {
+            res.status(500).json({message: `There was an error retrieving the objects`, error: err})
+        });
 })
 
 router.delete('/:id', (req, res) => {
     projects.remove(req.params.id)
-    .then(del => {
-        if (del === 0){
-            res.status(404).json({message: `Error: Project ID# ${req.params.id} does not exist in the database`})
-        } else {
-            res.status(200).json({message: `The project with ID# ${req.params.id} has been deleted`, deleted: del})
-        }
-    })
+        .then(del => {
+            if (del === 0){
+                res.status(404).json({message: `Error: Project ID# ${req.params.id} does not exist in the database`})
+            } else {
+                res.status(200).json({message: `The project with ID# ${req.params.id} has been deleted`, deleted: del})
+            }
+        })
         .catch(err => {
             res.status(500).json({message: `There was an error deleting project ID# ${req.params.id}`, error: err})
         })
